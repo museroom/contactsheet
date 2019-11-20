@@ -4,11 +4,10 @@
 """Tests for `contactsheet` package."""
 
 import pytest
-
 from click.testing import CliRunner
 
-from contactsheet import contactsheet
 from contactsheet import cli
+from contactsheet import contactsheet
 
 
 def test_command_line_interface():

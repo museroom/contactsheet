@@ -4,10 +4,13 @@ Functions for creating contactsheet images.
 """
 import math
 
-from PIL import Image, ImageOps
+import os
+from PIL import Image, ImageOps, ImageFont, ImageDraw
+
+font = ImageFont.truetype(os.path.join('asset', "Roboto-Bold.ttf"), 48)
 
 
-def create_tiled_image(image_paths):
+def create_tiled_image(image_paths, start_index):
     image_count = len(image_paths)
     if image_count == 0:
         return Image.new("RGBA", (1, 1), "black")
@@ -16,15 +19,20 @@ def create_tiled_image(image_paths):
     final_image = Image.new("RGBA", output_size, "black")
 
     for i, image_path in enumerate(image_paths):
-        insert_image_into_grid(final_image, tile_size, image_path, get_location_in_grid(grid_size, i))
+        insert_image_into_grid(final_image, tile_size, image_path, get_location_in_grid(grid_size, i),
+                               i+start_index)
 
     return final_image
 
 
-def insert_image_into_grid(final_image, tile_size, image_path, location):
+def insert_image_into_grid(final_image, tile_size, image_path, location, index):
     input_image = Image.open(image_path)
     input_image.thumbnail(tile_size)
-    final_image.paste(input_image, (tile_size[0] * location[0], tile_size[1] * location[1]))
+    img_location = (tile_size[0] * location[0], tile_size[1] * location[1])
+    final_image.paste(input_image, img_location)
+    # draw.text((x, y),"Sample Text",(r,g,b))
+    draw = ImageDraw.Draw(final_image)
+    draw.text(img_location, "{}".format(index), (255, 255, 255), font=font)
     return final_image
 
 
@@ -75,7 +83,7 @@ def get_tiled_image_dimensions(grid_size, image_size):
     # find the final height by multiplying up the tile size by the number of rows.
     final_height = tile_height * grid_size[1]
 
-    return (tile_width, tile_height), (image_size[0], final_height)
+    return (int(tile_width), int(tile_height)), (int(image_size[0]), int(final_height))
 
 
 def get_grid_size(cell_count):
