@@ -7,7 +7,11 @@ import math
 import os
 from PIL import Image, ImageOps, ImageFont, ImageDraw
 
-font = ImageFont.truetype(os.path.join('asset', "Roboto-Bold.ttf"), 48)
+font = ImageFont.truetype(os.path.join('assets', "Roboto-Bold.ttf"), 96)
+
+
+def compute_font_scale():
+    return 48
 
 
 def create_tiled_image(image_paths, start_index):
@@ -16,22 +20,29 @@ def create_tiled_image(image_paths, start_index):
         return Image.new("RGBA", (1, 1), "black")
     grid_size = get_grid_size(image_count)
     tile_size, output_size = get_tiled_image_dimensions(grid_size, Image.open(image_paths[0]).size)
+    # TODO: compute tile_size and output_size
+    tile_size = (1008, 756)
+    output_size = (4032, 2268)
     final_image = Image.new("RGBA", output_size, "black")
 
     for i, image_path in enumerate(image_paths):
         insert_image_into_grid(final_image, tile_size, image_path, get_location_in_grid(grid_size, i),
-                               i+start_index)
+                               i + start_index)
 
     return final_image
 
 
 def insert_image_into_grid(final_image, tile_size, image_path, location, index):
     input_image = Image.open(image_path)
+    width, height = input_image.size
+    if width < height:
+        input_image = input_image.rotate(90,expand=1)
     input_image.thumbnail(tile_size)
     img_location = (tile_size[0] * location[0], tile_size[1] * location[1])
     final_image.paste(input_image, img_location)
     # draw.text((x, y),"Sample Text",(r,g,b))
     draw = ImageDraw.Draw(final_image)
+    draw.text((2+img_location[0],2+img_location[1]), "{}".format(index), (0, 0, 0), font=font)
     draw.text(img_location, "{}".format(index), (255, 255, 255), font=font)
     return final_image
 
